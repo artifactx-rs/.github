@@ -1,72 +1,88 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/artifactx-rs/.github/main/profile/logo.png" alt="ArtifactX" width="300">
+<img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/logo.svg" alt="ArtifactX" width="720">
 
-# Build Once · Package Once · Publish Everywhere
+# ArtifactX — import existing apt/yum repos into a signed static repo
 
-**Your own signed apt + yum repository in under five minutes — from one static binary.**
+**Import first. Cut over when ready.**
 
-No database. No JVM. No web console. No Ruby. No `dpkg-deb` or `rpmbuild`.
-Just a single pure-Rust binary that **packages** your software and **publishes** it
-to a repository `apt-get` and `dnf` install from directly.
+Pull packages from the repos you already have, regenerate apt/yum metadata under
+your key, and serve the result from one static Rust binary.
+
+[![CI](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml)
+[![Release](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/artifactx-rs/artifactx)](https://github.com/artifactx-rs/artifactx/releases/latest)
+[![crates.io](https://img.shields.io/crates/v/artifactx.svg)](https://crates.io/crates/artifactx)
 
 </div>
 
 ---
 
-## The 5-minute story
+## The short version
+
+ArtifactX (`arx`) is for teams that ship Linux packages but do not want to run
+Nexus, aptly, Pulp, S3 glue scripts, custom signing jobs, and a web server just
+so users can run `apt install` or `dnf install`.
 
 ```bash
-arx init ./repo                     # scaffold + generate a signing key
-arx pack ./myapp.toml               # one manifest → .deb + .rpm (no toolchain)
-arx add ./dist/*.deb ./dist/*.rpm   # drop into the pool
-arx publish                         # generate + PGP-sign apt & yum metadata (atomic)
-arx serve                           # ready for apt-get / dnf
+# Path 1: migrate a slice of an existing repo, then serve it
+arx init ./repo
+arx import https://packages.example.com --apt --dist stable --component main --match-name myapp
+arx publish --root ./repo
+arx serve --root ./repo
 ```
 
-Need to pull a bad release? `arx rm myapp --version 1.2.3`. Reclaim disk?
-`arx gc --keep 5`. That's the whole product.
+```bash
+# Path 2: start a new repo from packages you already built
+arx init ./repo
+arx add dist/*.deb dist/*.rpm --root ./repo
+arx publish --root ./repo
+arx serve --root ./repo
+```
 
-## Why ArtifactX?
+Users get the boring install path they already know:
 
-The package-repo world splits into two camps: heavyweight **platforms**
-(Nexus, JFrog, Pulp — databases, JVMs, RBAC, web UIs) and someone-else's-**SaaS**
-(Cloudsmith, Gemfury, packagecloud — their servers, their bill). ArtifactX takes the
-unoccupied middle:
+```bash
+sudo apt-get update && sudo apt-get install myapp
+# or
+sudo dnf install myapp
+```
 
-> **aptly's safety** (every version kept, atomic publish, one-command rollback) ·
-> **nfpm's manifest** (one file → many native formats) ·
-> **Cloudsmith's push DX** (one-line CI, keyless OIDC auth) —
-> in **one self-hosted static binary**, with none of the platform.
+## Why ArtifactX
 
-| Instead of… | …you get |
-| --- | --- |
-| **Nexus / Artifactory** (JVM + DB + license) | one static binary, running in 5 minutes |
-| **Pulp** (Postgres + Django + workers) | immutable, atomically-published repo states — minus the cluster |
-| **Cloudsmith / Gemfury** (their servers, their bill) | the same one-line push + OIDC, on infra **you** own |
-| **aptly** (5-step toolkit, DB to clean, slow republish) | `push` · `rm` · `rollback` — same safety, none of the bookkeeping |
-| **reprepro** (forgets your old versions) | every version kept; roll back in one command |
-| **nfpm / FPM** (package, then stop at a file) | package **and publish**, end-to-end, deterministic, zero host tools |
+- **Import first** — pull packages from existing apt or yum/dnf repositories into
+  your own signed repo.
+- **One binary** — pack, add, import, publish, serve, push, promote, GC, rollback.
+- **Signed repository metadata** — apt `InRelease` / `Release.gpg`, yum
+  `repomd.xml.asc`. Package signing stays in your build pipeline.
+- **Atomic publish + rollback** — build metadata in staging, flip the live state,
+  and roll back when a bad release escapes.
+- **CI-friendly push** — upload to `arx serve` with a token or GitHub OIDC.
+- **No daemon required** — static binary, Docker image, or GitHub Pages-hosted repo.
 
-## What it does
+## What is shipped
 
-- 📦 **apt + yum from one tool** — Debian `Packages`/`Release` + RPM `repodata`, PGP-signed, verified against real `apt-get` and `dnf`.
-- 🏗️ **Package without a toolchain** — `pack`: one manifest → native `.deb`/`.rpm` in pure Rust (no `dpkg-deb`, no `rpmbuild`).
-- 🔏 **Signed & atomic** — `InRelease`/`Release.gpg`/`repomd.xml.asc`; `by-hash` + atomic swap so clients never see a torn publish.
-- 🌐 **Serve built-in** — one HTTP command; drop it behind nginx/Caddy for production.
-- 🦀 **One static binary** — drops into a `scratch` container; nothing to operate.
+| Pillar | Status | Highlights |
+| --- | --- | --- |
+| Repository | ✅ Shipped | apt + yum/dnf metadata, signing, import, publish, rollback, GC, promote, watch, HTTP API. |
+| Package | ✅ Shipped | Pure-Rust `.deb`, `.rpm`, `.apk`; Cargo.toml-driven pack; Docker backend. |
+| Operations | 🟢 Polishing | Import-first docs, trust path, Pages dogfood, systemd/Docker guidance. |
 
-## Heritage
+## Current roadmap
 
-We didn't invent the [pool layout, suite-as-index] (Debian's **dak**), the
-[one-manifest-many-formats] idea (**FPM**, **EPM**, **nfpm**), or the
-[no-database 5-minute repo] (**mini-dinstall**, **freight**). We put all three in a
-single Rust binary, deleted the database and the Ruby, and added the **publish** step
-none of them had.
+- 🟢 **Now:** [`v0.1.x — Import-first polish`](https://github.com/artifactx-rs/artifactx/milestone/1)
+- 🔵 **Next:** [`v0.2.0 — Packaging ergonomics`](https://github.com/artifactx-rs/artifactx/milestone/2)
+- 📋 **Project board:** <https://github.com/orgs/artifactx-rs/projects/1>
+- 🧭 **Roadmap:** <https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md>
+
+## Repositories
+
+- [`artifactx`](https://github.com/artifactx-rs/artifactx) — the `arx` CLI,
+  packager, repository generator, server, and documentation.
 
 ---
 
 <div align="center">
-<sub><b>ArtifactX</b> — remove the friction from software distribution.</sub><br>
-<sub>Open-source · pure-Rust · self-hosted · alpha</sub>
+<sub><b>ArtifactX</b> — import first, publish safely, cut over when ready.</sub><br>
+<sub>Open-source · Rust · self-hosted · alpha</sub>
 </div>
