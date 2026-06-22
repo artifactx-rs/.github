@@ -48,6 +48,16 @@ sudo apt-get update && sudo apt-get install myapp
 sudo dnf install myapp
 ```
 
+## How it works
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/readme-architecture.svg" alt="ArtifactX import, sign, publish, and static hosting architecture">
+</p>
+
+ArtifactX keeps the repository as inspectable static files: import or add
+packages, sign regenerated metadata, publish atomically, and serve from `arx
+serve`, GitHub Pages, nginx, or object storage.
+
 ## Why ArtifactX
 
 - **Import first** — pull packages from existing apt or yum/dnf repositories into
