@@ -80,15 +80,12 @@ serve`, GitHub Pages, nginx, or object storage.
 
 ## Current roadmap
 
-GitHub is the live source of truth for roadmap state; this profile links to the
-queries that update as milestones and issues move.
+GitHub issues and milestones are the live source of truth; the roadmap document
+keeps the product narrative and definitions of done.
 
-- 📋 **Project board:** <https://github.com/orgs/artifactx-rs/projects/1>
-- 🧭 **Milestones:** <https://github.com/artifactx-rs/artifactx/milestones>
-- 🔵 **Open milestone work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20milestone%3A%2A>
-- ✅ **Closed milestone work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aclosed%20milestone%3A%2A>
-- ⚪ **Later / unmilestoned work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone>
-- 🧾 **Roadmap narrative:** <https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md>
+- **Plan:** [Project board](https://github.com/orgs/artifactx-rs/projects/1) · [Milestones](https://github.com/artifactx-rs/artifactx/milestones) · [Roadmap narrative](https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md)
+- **Queues:** [Open milestone work](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20milestone%3A%2A) · [Later / unmilestoned](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone)
+- **Archive:** [Closed milestone work](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aclosed%20milestone%3A%2A)
 
 ## Repositories
 
