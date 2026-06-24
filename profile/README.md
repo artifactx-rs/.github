@@ -75,17 +75,19 @@ serve`, GitHub Pages, nginx, or object storage.
 | Pillar | Status | Highlights |
 | --- | --- | --- |
 | Repository | ✅ Shipped | apt + yum/dnf metadata, signing, import, publish, rollback, GC, promote, watch, HTTP API. |
-| Package | ✅ Shipped | Pure-Rust `.deb`, `.rpm`, `.apk`; Cargo.toml-driven pack; Docker backend. |
+| Package | ✅ Shipped | Pure-Rust `.deb`, `.rpm`, `.apk`, `.pkg.tar.zst`; Cargo.toml-driven pack; Docker backend. |
 | Operations | 🟢 Polishing | Import-first docs, trust path, Pages dogfood, systemd/Docker guidance. |
 
-## Current roadmap
+## Roadmap
 
-GitHub issues and milestones are the live source of truth; the roadmap document
-keeps the product narrative and definitions of done.
+GitHub is the live source of truth for planning state. The org profile stays
+version-neutral; milestones and issues update as work moves, and `ROADMAP.md`
+keeps the product narrative.
 
-- **Plan:** [Project board](https://github.com/orgs/artifactx-rs/projects/1) · [Milestones](https://github.com/artifactx-rs/artifactx/milestones) · [Roadmap narrative](https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md)
-- **Queues:** [Open milestone work](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20milestone%3A%2A) · [Later / unmilestoned](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone)
-- **Archive:** [Closed milestone work](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aclosed%20milestone%3A%2A)
+[Project board](https://github.com/orgs/artifactx-rs/projects/1) ·
+[Open milestones](https://github.com/artifactx-rs/artifactx/milestones?state=open) ·
+[Backlog](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone) ·
+[Roadmap narrative](https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md)
 
 ## Repositories
 
