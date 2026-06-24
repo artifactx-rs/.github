@@ -2,12 +2,13 @@
 
 <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/org-logo.png" alt="ArtifactX" width="180">
 
-# ArtifactX — import existing apt/yum repos into a signed static repo
+# ArtifactX — publish apt/yum repos and Linux packages from one Rust binary
 
 **Import first. Cut over when ready.**
 
-Pull packages from the repos you already have, regenerate apt/yum metadata under
-your key, and serve the result from one static Rust binary.
+Pull packages from the repos you already have, package new release artifacts when
+you need them, regenerate apt/yum metadata under your key, and serve the result
+from one static Rust binary.
 
 [![CI](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml)
 [![Release](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml)
@@ -40,6 +41,14 @@ arx publish --root ./repo
 arx serve --root ./repo
 ```
 
+```bash
+# Path 3: build Linux packages, then publish the .deb/.rpm outputs
+cargo build --release
+arx pack ./Cargo.toml --out dist
+arx add dist --root ./repo
+arx publish --root ./repo
+```
+
 Users get the boring install path they already know:
 
 ```bash
@@ -54,15 +63,16 @@ sudo dnf install myapp
   <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/readme-architecture.svg" alt="ArtifactX import, sign, publish, and static hosting architecture">
 </p>
 
-ArtifactX keeps the repository as inspectable static files: import or add
-packages, sign regenerated metadata, publish atomically, and serve from `arx
-serve`, GitHub Pages, nginx, or object storage.
+ArtifactX keeps the repository as inspectable static files: pack, import, or
+add packages, sign regenerated metadata, publish atomically, and serve from
+`arx serve`, GitHub Pages, nginx, or object storage.
 
 ## Why ArtifactX
 
 - **Import first** — pull packages from existing apt or yum/dnf repositories into
   your own signed repo.
-- **One binary** — pack, add, import, publish, serve, push, promote, GC, rollback.
+- **One binary** — pack, add, import, publish, publish-dir, serve, push, promote, search, GC, rollback.
+- **Native package output** — build `.deb`, `.rpm`, `.apk`, and Arch `.pkg.tar.zst` from a manifest or Rust `Cargo.toml`.
 - **Signed repository metadata** — apt `InRelease` / `Release.gpg`, yum
   `repomd.xml.asc`. Package signing stays in your build pipeline.
 - **Atomic publish + rollback** — build metadata in staging, flip the live state,
@@ -76,7 +86,7 @@ serve`, GitHub Pages, nginx, or object storage.
 | --- | --- | --- |
 | Repository | ✅ Shipped | apt + yum/dnf metadata, signing, import, publish, rollback, GC, promote, watch, HTTP API. |
 | Package | ✅ Shipped | Pure-Rust `.deb`, `.rpm`, `.apk`, `.pkg.tar.zst`; Cargo.toml-driven pack; Docker backend. |
-| Operations | 🟢 Polishing | Import-first docs, trust path, Pages dogfood, systemd/Docker guidance. |
+| Operations | 🟢 Polishing | Adoption docs, trust path, Pages dogfood, systemd/Docker guidance. |
 
 ## Roadmap
 
