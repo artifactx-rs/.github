@@ -35,7 +35,7 @@ arx serve --root ./repo
 ```bash
 # Path 2: start a new repo from packages you already built
 arx init ./repo
-arx add dist/*.deb dist/*.rpm --root ./repo
+arx add dist --root ./repo
 arx publish --root ./repo
 arx serve --root ./repo
 ```
@@ -80,10 +80,15 @@ serve`, GitHub Pages, nginx, or object storage.
 
 ## Current roadmap
 
-- 🟢 **Now:** [`v0.1.x — Import-first polish`](https://github.com/artifactx-rs/artifactx/milestone/1)
-- 🔵 **Next:** [`v0.2.0 — Packaging ergonomics`](https://github.com/artifactx-rs/artifactx/milestone/2)
+GitHub is the live source of truth for roadmap state; this profile links to the
+queries that update as milestones and issues move.
+
 - 📋 **Project board:** <https://github.com/orgs/artifactx-rs/projects/1>
-- 🧭 **Roadmap:** <https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md>
+- 🧭 **Milestones:** <https://github.com/artifactx-rs/artifactx/milestones>
+- 🔵 **Open milestone work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20milestone%3A%2A>
+- ✅ **Closed milestone work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aclosed%20milestone%3A%2A>
+- ⚪ **Later / unmilestoned work:** <https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone>
+- 🧾 **Roadmap narrative:** <https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md>
 
 ## Repositories
 
