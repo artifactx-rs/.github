@@ -35,7 +35,9 @@ arx publish --root ./repo              # sign and index apt + yum metadata
 arx serve --root ./repo                # http://127.0.0.1:8080
 ```
 
-Clients then install normally, once they trust the repo key:
+`arx serve` listens on `127.0.0.1` only, so that example serves clients on the
+same host. Point a client at the repo first — trust the key and add the source,
+as shown in [Install clients](https://github.com/artifactx-rs/artifactx/blob/main/docs/how-to/install-clients.md).
 
 ```bash
 sudo apt-get update && sudo apt-get install myapp
