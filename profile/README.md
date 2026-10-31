@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/org-logo.png" alt="ArtifactX" width="180">
+<img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/org-logo.svg" alt="ArtifactX" width="180">
 
 # ArtifactX — publish apt/yum repos from one static binary
 
