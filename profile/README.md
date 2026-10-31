@@ -2,13 +2,13 @@
 
 <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/org-logo.png" alt="ArtifactX" width="180">
 
-# ArtifactX — publish apt/yum repos and Linux packages from one Rust binary
+# ArtifactX — publish apt/yum repos from one static binary
 
 **Import first. Cut over when ready.**
 
-Pull packages from the repos you already have, package new release artifacts when
-you need them, regenerate apt/yum metadata under your key, and serve the result
-from one static Rust binary.
+Pull packages from the repositories you already publish, build new ones when you
+need them, re-sign apt/yum metadata under your own key, and serve the result from
+one static Rust binary.
 
 [![CI](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/ci.yml)
 [![Release](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml/badge.svg)](https://github.com/artifactx-rs/artifactx/actions/workflows/release.yml)
@@ -21,35 +21,21 @@ from one static Rust binary.
 
 ## The short version
 
-ArtifactX (`arx`) is for teams that ship Linux packages but do not want to run
-Nexus, aptly, Pulp, S3 glue scripts, custom signing jobs, and a web server just
-so users can run `apt install` or `dnf install`.
+ArtifactX (`arx`) is for teams that ship Linux packages and are tired of operating
+Nexus, aptly, Pulp, S3 glue scripts, a custom signing job, and a web server just so
+users can run `apt install` or `dnf install`.
+
+The repository is a directory you can inspect, back up, move, and rebuild. The
+service is one binary with no daemon state and no database.
 
 ```bash
-# Path 1: migrate a slice of an existing repo, then serve it
-arx init ./repo
-arx import https://packages.example.com --apt --dist stable --component main --match-name myapp
-arx publish --root ./repo
-arx serve --root ./repo
+arx init ./repo                        # repository layout + signing key
+arx add dist --root ./repo             # your built .deb / .rpm files
+arx publish --root ./repo              # sign and index apt + yum metadata
+arx serve --root ./repo                # http://127.0.0.1:8080
 ```
 
-```bash
-# Path 2: start a new repo from packages you already built
-arx init ./repo
-arx add dist --root ./repo
-arx publish --root ./repo
-arx serve --root ./repo
-```
-
-```bash
-# Path 3: build Linux packages, then publish the .deb/.rpm outputs
-cargo build --release
-arx pack ./Cargo.toml --out dist
-arx add dist --root ./repo
-arx publish --root ./repo
-```
-
-Users get the boring install path they already know:
+Clients then install normally, once they trust the repo key:
 
 ```bash
 sudo apt-get update && sudo apt-get install myapp
@@ -57,28 +43,41 @@ sudo apt-get update && sudo apt-get install myapp
 sudo dnf install myapp
 ```
 
+Already publishing elsewhere? Migrate a slice first, verify clients, then cut over:
+
+```bash
+arx import https://packages.example.com --apt \
+  --dist stable --component main --match-name myapp --limit 20 --root ./repo
+```
+
 ## How it works
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/readme-architecture.svg" alt="ArtifactX import, sign, publish, and static hosting architecture">
+  <img src="https://raw.githubusercontent.com/artifactx-rs/artifactx/main/res/readme-architecture.svg" alt="Packages or existing repositories flow through arx, which signs metadata and publishes static files or serves apt/dnf clients">
 </p>
 
-ArtifactX keeps the repository as inspectable static files: pack, import, or
-add packages, sign regenerated metadata, publish atomically, and serve from
-`arx serve`, GitHub Pages, nginx, or object storage.
+Three things enter — an existing apt/yum repository, the `.deb`/`.rpm` files you
+already built, or a manifest that `arx pack` turns into packages. One thing leaves:
+signed apt/yum metadata plus a directory of static files that any dumb HTTP host
+can serve.
 
 ## Why ArtifactX
 
 - **Import first** — pull packages from existing apt or yum/dnf repositories into
-  your own signed repo.
-- **One binary** — pack, add, import, publish, publish-dir, serve, push, promote, search, GC, rollback.
-- **Native package output** — build `.deb`, `.rpm`, `.apk`, and Arch `.pkg.tar.zst` from a manifest or Rust `Cargo.toml`.
+  your own signed repo, bounded by `--match-name`, `--arch`, and `--limit`.
+- **One binary** — pack, add, import, publish, publish-dir, serve, push, promote,
+  search, GC, rollback.
+- **Package output** — `.deb`, `.rpm`, `.apk`, and Arch `.pkg.tar.zst` from a
+  manifest or Rust `Cargo.toml`. It packages binaries you have already built — it
+  does not run `cargo build` for you. Only `.deb` and `.rpm` feed the apt/yum
+  index; the other two are artifacts for downstream channels.
 - **Signed repository metadata** — apt `InRelease` / `Release.gpg`, yum
-  `repomd.xml.asc`. Package signing stays in your build pipeline.
+  `repomd.xml.asc`. Package payload signing stays in your build pipeline.
 - **Atomic publish + rollback** — build metadata in staging, flip the live state,
-  and roll back when a bad release escapes.
+  and return to a previous state when a bad release escapes.
 - **CI-friendly push** — upload to `arx serve` with a token or GitHub OIDC.
-- **No daemon required** — static binary, Docker image, or GitHub Pages-hosted repo.
+- **No daemon required** — static binary, Docker image, or a GitHub Pages-hosted
+  repo. Clients verify the signature, not the host.
 
 ## What is shipped
 
@@ -87,6 +86,19 @@ add packages, sign regenerated metadata, publish atomically, and serve from
 | Repository | ✅ Shipped | apt + yum/dnf metadata, signing, import, publish, rollback, GC, promote, watch, HTTP API. |
 | Package | ✅ Shipped | Pure-Rust `.deb`, `.rpm`, `.apk`, `.pkg.tar.zst`; Cargo.toml-driven pack; Docker backend. |
 | Operations | 🟢 Polishing | Adoption docs, trust path, Pages dogfood, systemd/Docker guidance. |
+
+The org's own package repository runs on this:
+[artifactx-rs.github.io/artifactx](https://artifactx-rs.github.io/artifactx/) is a
+signed apt/yum repo generated by the same binary, with no server behind it.
+
+## Repositories
+
+- [`artifactx`](https://github.com/artifactx-rs/artifactx) — the `arx` CLI,
+  packager, repository generator, server, and documentation.
+- [`createrepo_rs`](https://github.com/artifactx-rs/createrepo_rs) — pure-Rust
+  drop-in for `createrepo_c`; byte-identical dnf/yum repodata, no C dependencies.
+- [`repo`](https://github.com/artifactx-rs/repo) — the package repository and
+  GitHub Pages feed.
 
 ## Roadmap
 
@@ -98,11 +110,6 @@ keeps the product narrative.
 [Open milestones](https://github.com/artifactx-rs/artifactx/milestones?state=open) ·
 [Backlog](https://github.com/artifactx-rs/artifactx/issues?q=is%3Aissue%20is%3Aopen%20no%3Amilestone) ·
 [Roadmap narrative](https://github.com/artifactx-rs/artifactx/blob/main/ROADMAP.md)
-
-## Repositories
-
-- [`artifactx`](https://github.com/artifactx-rs/artifactx) — the `arx` CLI,
-  packager, repository generator, server, and documentation.
 
 ---
 
